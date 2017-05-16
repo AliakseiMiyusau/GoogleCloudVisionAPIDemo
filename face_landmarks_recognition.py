@@ -3,14 +3,20 @@ from google.cloud import vision
 from google.cloud.vision.feature import Feature
 from google.cloud.vision.feature import FeatureTypes
 import cv2
+import math
 
 image0 = "/home/aliaksei/Documents/SemanticTube/test0.jpg"
 image1 = "/home/aliaksei/Documents/SemanticTube/test1.jpg"
 image2 = "/home/aliaksei/Documents/SemanticTube/test2.png"
 image3 = "/home/aliaksei/Documents/SemanticTube/test3.jpg"
 image4 = "/home/aliaksei/Documents/SemanticTube/test4.jpg"
+image5 = "/home/aliaksei/Documents/SemanticTube/test5.jpg"
 
-image_list = [image0, image1, image2, image3, image4]
+image_list = [image0, image1, image2, image3, image4, image5]
+
+
+def distance(point1, point2):
+    return math.sqrt((point1[0]-point2[0])**2 + (point1[1]-point2[1])**2)
 
 
 def process_batch(image_list):
@@ -33,6 +39,12 @@ def blur_face(image, top_left, bot_right):
     image[top_left[1]:bot_right[1], top_left[0]:bot_right[0]] = blurred_face
 
     return image
+
+
+def simple_classifier(left_eye, right_eye, mouth, chin):
+    if distance(left_eye, mouth) > 1.9*distance(chin, mouth) and distance(left_eye, right_eye) > 0.9*distance(left_eye, mouth):
+        return True
+    return False
 
 
 def main():
@@ -66,7 +78,8 @@ def main():
             print("Right Eyebrow: " + str(right_eyebrow))
             print("Mouth: " + str(mouth))
 
-            img = blur_face(img, top_left_face_point, bot_right_face_point)
+            if simple_classifier(left_eye, right_eye, mouth, chin):
+                img = blur_face(img, top_left_face_point, bot_right_face_point)
 
             cv2.circle(img, left_eye, 3, (255, 255, 255))
             cv2.circle(img, right_eye, 3, (255, 255, 255))    
