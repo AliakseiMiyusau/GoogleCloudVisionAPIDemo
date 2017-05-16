@@ -34,8 +34,10 @@ def main():
             left_eye = (int(face.landmarks.left_eye.position.x_coordinate), int(face.landmarks.left_eye.position.y_coordinate))
             right_eye = (int(face.landmarks.right_eye.position.x_coordinate), int(face.landmarks.right_eye.position.y_coordinate))
             chin = (int(face.landmarks.chin_gnathion.position.x_coordinate), int(face.landmarks.chin_gnathion.position.y_coordinate))
-            left_eyebrow = (int(face.landmarks.left_eyebrow_upper_midpoint.position.x_coordinate), int(face.landmarks.left_eyebrow_upper_midpoint.position.y_coordinate))
-            right_eyebrow = (int(face.landmarks.right_eyebrow_upper_midpoint.position.x_coordinate), int(face.landmarks.right_eyebrow_upper_midpoint.position.y_coordinate))
+            left_eyebrow = (int(face.landmarks.left_eyebrow_upper_midpoint.position.x_coordinate), 
+                            int(face.landmarks.left_eyebrow_upper_midpoint.position.y_coordinate))
+            right_eyebrow = (int(face.landmarks.right_eyebrow_upper_midpoint.position.x_coordinate), 
+                             int(face.landmarks.right_eyebrow_upper_midpoint.position.y_coordinate))
             mouth = (int(face.landmarks.mouth_center.position.x_coordinate), int(face.landmarks.mouth_center.position.y_coordinate))
 
             print("Left Eye: " + str(left_eye))
