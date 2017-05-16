@@ -8,8 +8,10 @@ image0 = "/home/aliaksei/Documents/SemanticTube/test0.jpg"
 image1 = "/home/aliaksei/Documents/SemanticTube/test1.jpg"
 image2 = "/home/aliaksei/Documents/SemanticTube/test2.png"
 image3 = "/home/aliaksei/Documents/SemanticTube/test3.jpg"
+image4 = "/home/aliaksei/Documents/SemanticTube/test4.jpg"
 
-image_list = [image0, image1, image2, image3]
+image_list = [image0, image1, image2, image3, image4]
+
 
 def process_batch(image_list):
  
@@ -24,18 +26,32 @@ def process_batch(image_list):
     results = batch.detect()
     return results
 
-def main():
 
+def blur_faces(image, face_points):
+
+    for face in face_points:       
+        sub_face = image[face[0][1]:face[1][1], face[0][0]:face[1][0]]
+        sub_face = cv2.GaussianBlur(sub_face,(23, 23), 30)
+        image[face[0][1]:face[0][1]+sub_face.shape[0], face[0][0]:face[0][0]+sub_face.shape[1]] = sub_face
+
+    return image
+   
+   
+def main():
 
     result = process_batch(image_list)
     i = 0
     for image in result:
         img = cv2.imread(image_list[i])
         print image_list[i]
+
+        image_face_points = []
+
         for face in image.faces:
 
             top_left_face_point = (face.bounds.vertices[0].x_coordinate, face.bounds.vertices[0].y_coordinate)
             bot_right_face_point = (face.bounds.vertices[2].x_coordinate, face.bounds.vertices[2].y_coordinate)
+            image_face_points.append((top_left_face_point, bot_right_face_point))
 
             left_eye = (int(face.landmarks.left_eye.position.x_coordinate), int(face.landmarks.left_eye.position.y_coordinate))
             right_eye = (int(face.landmarks.right_eye.position.x_coordinate), int(face.landmarks.right_eye.position.y_coordinate))
@@ -60,7 +76,10 @@ def main():
             cv2.circle(img, left_eyebrow, 3, (255, 255, 255))    
             cv2.circle(img, right_eyebrow, 3, (255, 255, 255))
             cv2.circle(img, mouth, 3, (255, 255, 255))
-            cv2.rectangle(img, top_left_face_point, bot_right_face_point, (255, 255, 0))
+            
+            #cv2.rectangle(img, top_left_face_point, bot_right_face_point, (255, 255, 0))
+            
+        img = blur_faces(img, image_face_points)
         cv2.imwrite("output" + str(i) + ".jpg", img)
         i+=1
         
