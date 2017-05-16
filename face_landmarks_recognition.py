@@ -40,7 +40,7 @@ def blur_face(image, top_left, bot_right):
 
     return image
 
-
+#just a stub; it doesnt work
 def simple_classifier(left_eye, right_eye, mouth, chin):
     if distance(left_eye, mouth) > 1.9*distance(chin, mouth) and distance(left_eye, right_eye) > 0.9*distance(left_eye, mouth):
         return True
