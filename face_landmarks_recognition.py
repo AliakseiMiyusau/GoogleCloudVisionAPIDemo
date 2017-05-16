@@ -51,8 +51,8 @@ def main():
             cv2.circle(img, left_eyebrow, 3, (255, 255, 255))    
             cv2.circle(img, right_eyebrow, 3, (255, 255, 255))
             cv2.circle(img, mouth, 3, (255, 255, 255))
-        i+=1
         cv2.imwrite("output" + str(i) + ".jpg", img)
+        i+=1
             
 if __name__ == "__main__":
     main()
