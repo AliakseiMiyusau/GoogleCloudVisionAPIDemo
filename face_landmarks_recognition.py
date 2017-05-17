@@ -4,15 +4,13 @@ from google.cloud.vision.feature import Feature
 from google.cloud.vision.feature import FeatureTypes
 import cv2
 import math
+import glob
+import os
 
-image0 = "/home/aliaksei/Documents/SemanticTube/test0.jpg"
-image1 = "/home/aliaksei/Documents/SemanticTube/test1.jpg"
-image2 = "/home/aliaksei/Documents/SemanticTube/test2.png"
-image3 = "/home/aliaksei/Documents/SemanticTube/test3.jpg"
-image4 = "/home/aliaksei/Documents/SemanticTube/test4.jpg"
-image5 = "/home/aliaksei/Documents/SemanticTube/test5.jpg"
-
-image_list = [image0, image1, image2, image3, image4, image5]
+FRAMES_DIR = "/home/aliaksei/Documents/faces/frames/"
+FRAME_EXTENSION = "bmp"
+PROCESSED_FRAMES_DIR = "/home/aliaksei/Documents/faces/processed_frames/"
+BATCH_SIZE_LIMIT = 10485760
 
 
 def distance(point1, point2):
@@ -40,20 +38,20 @@ def blur_face(image, top_left, bot_right):
 
     return image
 
-#just a stub; it doesnt work
-def simple_classifier(left_eye, right_eye, mouth, chin):
-    if distance(left_eye, mouth) > 1.9*distance(chin, mouth) and distance(left_eye, right_eye) > 0.9*distance(left_eye, mouth):
-        return True
-    return False
+
+#STUB METHOD
+def simple_classifier():
+    return True
 
 
-def main():
+def process_video_frames(frame_list):
 
-    result = process_batch(image_list)
+    result = process_batch(frame_list)
     i = 0
     for image in result:
-        img = cv2.imread(image_list[i])
-        print image_list[i]
+        idx = frame_list[i].split("/")[-1].split(".")[0]
+        img = cv2.imread(frame_list[i])
+        print frame_list[i]
 
 
         for face in image.faces:
@@ -78,7 +76,7 @@ def main():
             print("Right Eyebrow: " + str(right_eyebrow))
             print("Mouth: " + str(mouth))
 
-            if simple_classifier(left_eye, right_eye, mouth, chin):
+            if simple_classifier():
                 img = blur_face(img, top_left_face_point, bot_right_face_point)
 
             cv2.circle(img, left_eye, 3, (255, 255, 255))
@@ -88,10 +86,36 @@ def main():
             cv2.circle(img, right_eyebrow, 3, (255, 255, 255))
             cv2.circle(img, mouth, 3, (255, 255, 255))
             #cv2.rectangle(img, top_left_face_point, bot_right_face_point, (255, 255, 0))
-
-        cv2.imwrite("output" + str(i) + ".jpg", img)
+        if not os.path.exists(PROCESSED_FRAMES_DIR):
+            os.makedirs(PROCESSED_FRAMES_DIR)
+        cv2.imwrite("processed_frames/" + idx + ".bmp", img)
         i+=1
-        
+
+
+def batch_video_frames(video_frames, BATCH_SIZE_LIMIT, FRAMES_PER_BATCH_LIMIT):
+    #assuming all frames have same byte size
+
+    frame_size = cv2.imread(video_frames[0]).shape
+    frame_byte_size = frame_size[0]*frame_size[1]*frame_size[2]
+    frames_per_batch = min(FRAMES_PER_BATCH_LIMIT, BATCH_SIZE_LIMIT / frame_byte_size)
+    batch_number = len(video_frames) * frame_byte_size / BATCH_SIZE_LIMIT
+    frame_batches = [[] for _ in range(batch_number)]
+    
+    i = 0
+    for i in range(batch_number):
+        frame_batches[i] = video_frames[i*frames_per_batch:(i+1)*frames_per_batch]
+        i = i+1
+    print frame_batches
+    return frame_batches
+    
+
+
+def main():
+
+    video_frames = glob.glob(FRAMES_DIR + "*." + FRAME_EXTENSION)
+    frame_batches = batch_video_frames(video_frames, BATCH_SIZE_LIMIT, FRAMES_PER_BATCH)
+    for batch in frame_batches:
+        process_video_frames(batch)
             
 if __name__ == "__main__":
     main()
